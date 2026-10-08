@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import type { HabitLog } from '../types/footprint';
 
-export function LogHabitView() {
-  const [logs, setLogs] = useState<HabitLog[]>([
-    { id: '1', category: 'Transport', description: 'Public Transit Bus', co2Kg: 2.1, date: '2026-10-04' },
-  ]);
+interface LogHabitViewProps {
+  logs: HabitLog[];
+  onAddLog: (log: HabitLog) => void;
+}
 
+export function LogHabitView({ logs, onAddLog }: LogHabitViewProps) {
   const [category, setCategory] = useState('Transport');
   const [description, setDescription] = useState('');
   const [co2Kg, setCo2Kg] = useState<number>(0);
@@ -22,7 +23,7 @@ export function LogHabitView() {
       date: new Date().toISOString().split('T')[0],
     };
 
-    setLogs([newLog, ...logs]);
+    onAddLog(newLog);
     setDescription('');
     setCo2Kg(0);
   };
