@@ -7,14 +7,22 @@ interface AnalyticsViewProps {
 
 export function AnalyticsView({ logs }: AnalyticsViewProps) {
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Footprint Analytics</h2>
-      <p className="text-gray-600 mb-6">Explore your historical carbon emission trends over time.</p>
+    <main className="page-content">
+      <section className="page-heading">
+        <p className="eyebrow">Patterns over time</p>
+        <h1>Your footprint, by category</h1>
+        <p className="page-intro">See which parts of your routine contribute most to your estimated emissions.</p>
+      </section>
 
-      <div className="p-6 bg-white rounded-lg shadow border">
-        <h3 className="font-semibold text-gray-800 mb-4">Emissions by Category</h3>
+      <section className="analytics-panel" aria-labelledby="category-breakdown-heading">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">All recorded entries</p>
+            <h2 id="category-breakdown-heading">Emissions by category</h2>
+          </div>
+        </div>
         <CategoryPieChart logs={logs} />
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

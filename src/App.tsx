@@ -19,7 +19,7 @@ export function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-gray-100 text-gray-900">
+      <div className="app-shell">
         <Navbar />
         <Routes>
           <Route path="/" element={<HomeView logs={logs} />} />

@@ -29,16 +29,20 @@ export function LogHabitView({ logs, onAddLog }: LogHabitViewProps) {
   };
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Log Daily Habit</h2>
-      
-      <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow border">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Category</label>
-          <select 
+    <main className="page-content page-content--narrow">
+      <section className="page-heading">
+        <p className="eyebrow">Make it count</p>
+        <h1>Log a daily habit</h1>
+        <p className="page-intro">Add an activity to your climate journal and keep your impact estimate up to date.</p>
+      </section>
+
+      <form onSubmit={handleSubmit} className="habit-form">
+        <div className="form-field">
+          <label htmlFor="habit-category">Category</label>
+          <select
+            id="habit-category"
             value={category} 
             onChange={(e) => setCategory(e.target.value)}
-            className="mt-1 block w-full p-2 border rounded-md"
           >
             <option value="Transport">Transport</option>
             <option value="Energy">Energy</option>
@@ -47,47 +51,56 @@ export function LogHabitView({ logs, onAddLog }: LogHabitViewProps) {
           </select>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Description</label>
-          <input 
+        <div className="form-field">
+          <label htmlFor="habit-description">Description</label>
+          <input
+            id="habit-description"
             type="text" 
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="e.g., Drove 10 miles, ate plant-based dinner"
-            className="mt-1 block w-full p-2 border rounded-md"
+            required
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Estimated CO₂ (kg)</label>
-          <input 
+        <div className="form-field">
+          <label htmlFor="habit-co2">Estimated CO₂ (kg)</label>
+          <input
+            id="habit-co2"
             type="number" 
             step="0.1"
+            min="0.1"
             value={co2Kg || ''}
             onChange={(e) => setCo2Kg(parseFloat(e.target.value) || 0)}
-            className="mt-1 block w-full p-2 border rounded-md"
+            required
           />
         </div>
 
-        <button type="submit" className="w-full bg-emerald-600 text-white p-2 rounded-md hover:bg-emerald-700">
-          Add Log Entry
+        <button type="submit" className="primary-button">
+          Add habit entry
         </button>
       </form>
 
-      <div className="mt-8">
-        <h3 className="text-lg font-semibold mb-4">Recorded Entries (Stateful List)</h3>
-        <ul className="space-y-2">
+      <section className="logged-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Your journal</p>
+            <h2>Recorded entries</h2>
+          </div>
+          <span className="entry-count">{logs.length} {logs.length === 1 ? 'entry' : 'entries'}</span>
+        </div>
+        {logs.length > 0 ? <ul className="activity-list">
           {logs.map((log) => (
-            <li key={log.id} className="flex justify-between items-center p-3 bg-gray-50 rounded border">
-              <div>
-                <span className="font-medium">{log.description}</span>
-                <span className="ml-2 text-xs bg-gray-200 px-2 py-1 rounded">{log.category}</span>
+            <li key={log.id} className="activity-row">
+              <div className="activity-copy">
+                <p className="activity-title">{log.description}</p>
+                <span className="category-tag">{log.category}</span>
               </div>
-              <span className="font-semibold text-emerald-600">{log.co2Kg} kg CO₂</span>
+              <span className="activity-value">{log.co2Kg} kg CO₂e</span>
             </li>
           ))}
-        </ul>
-      </div>
-    </div>
+        </ul> : <p className="empty-state">Your entries will appear here after you log a habit.</p>}
+      </section>
+    </main>
   );
 }

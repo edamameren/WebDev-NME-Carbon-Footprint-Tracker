@@ -1,16 +1,19 @@
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 export function Navbar() {
   return (
-    <nav className="bg-emerald-700 text-white p-4 shadow-md">
-      <div className="max-w-4xl mx-auto flex justify-between items-center">
-        <span className="font-bold text-lg">CarbonTracker</span>
-        <div className="space-x-6">
-          <Link to="/" className="hover:underline">Home</Link>
-          <Link to="/log" className="hover:underline">Log Habit</Link>
-          <Link to="/analytics" className="hover:underline">Analytics</Link>
+    <header className="site-header">
+      <nav className="site-nav" aria-label="Main navigation">
+        <NavLink to="/" className="brand-link" aria-label="Carbon Grove home">
+          <span className="brand-mark" aria-hidden="true">C</span>
+          <span>Carbon Grove</span>
+        </NavLink>
+        <div className="nav-links">
+          <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link nav-link--active' : 'nav-link'}>Overview</NavLink>
+          <NavLink to="/log" className={({ isActive }) => isActive ? 'nav-link nav-link--active' : 'nav-link'}>Log a habit</NavLink>
+          <NavLink to="/analytics" className={({ isActive }) => isActive ? 'nav-link nav-link--active' : 'nav-link'}>Analytics</NavLink>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }
