@@ -2,28 +2,27 @@ import type { HabitLog } from '../types/footprint';
 import { aggregateCo2ByCategory, type CategoryTotal } from '../utils/aggregateByCategory';
 import './CategoryPieChart.css';
 
-const CATEGORY_COLORS: Record<string, string> = {
-  Transport: '#0ea5e9',
-  Energy: '#f59e0b',
-  Diet: '#10b981',
-  Waste: '#8b5cf6',
-};
+const CATEGORY_COLORS = new Map([
+  ['Transport', '#0ea5e9'],
+  ['Energy', '#f59e0b'],
+  ['Diet', '#10b981'],
+  ['Waste', '#8b5cf6'],
+]);
 
 const FALLBACK_COLOR = '#6b7280';
 
 function colorForCategory(category: string): string {
-  return CATEGORY_COLORS[category] ?? FALLBACK_COLOR;
+  return CATEGORY_COLORS.get(category) ?? FALLBACK_COLOR;
 }
 
 function buildConicGradient(slices: CategoryTotal[], grandTotal: number): string {
   let cursor = 0;
-  const stops = slices.map(({ category, totalKg }) => {
+  const stops = slices.map(({ category, totalKg }, i) => {
     const start = cursor;
-    const end = cursor + (totalKg / grandTotal) * 100;
+    const end = i === slices.length - 1 ? 100 : cursor + (totalKg / grandTotal) * 100;
     cursor = end;
     return `${colorForCategory(category)} ${start}% ${end}%`;
   });
-
   return `conic-gradient(${stops.join(', ')})`;
 }
 
@@ -31,14 +30,17 @@ interface CategoryPieChartProps {
   logs: HabitLog[];
 }
 
-export function CategoryPieChart({ logs }: CategoryPieChartProps) {
-  const totals = aggregateCo2ByCategory(logs);
-  const grandTotal = totals.reduce((sum, item) => sum + item.totalKg, 0);
+export function CategoryPieChart({ logs = [] }: CategoryPieChartProps) {
+  const totals = aggregateCo2ByCategory(logs).filter(
+    (t) => Number.isFinite(t.totalKg) && t.totalKg > 0,
+  );
+  const grandTotal = totals.reduce((sum, t) => sum + t.totalKg, 0);
 
-  if (logs.length === 0 || grandTotal === 0) {
+  if (grandTotal <= 0) {
     return (
       <p className="text-gray-500 text-sm">
-        No habit logs yet. Add entries on the Log Habit page to see a category breakdown.
+        No habit logs yet. Add entries on the Log Habit page to see a
+        category breakdown.
       </p>
     );
   }
@@ -49,7 +51,7 @@ export function CategoryPieChart({ logs }: CategoryPieChartProps) {
         className="category-pie__chart"
         style={{ background: buildConicGradient(totals, grandTotal) }}
         role="img"
-        aria-label="Pie chart of carbon emissions by category"
+        aria-label={`Pie chart of carbon emissions by category, ${grandTotal.toFixed(1)} kg CO₂ total`}
       >
         <div className="category-pie__hole">
           <span className="category-pie__total">{grandTotal.toFixed(1)}</span>
@@ -72,7 +74,7 @@ export function CategoryPieChart({ logs }: CategoryPieChartProps) {
                 {category}
               </span>
               <span className="category-pie__value">
-                {totalKg.toFixed(1)} kg · {percent.toFixed(0)}%
+                {totalKg.toFixed(1)} kg · {percent < 1 ? '<1' : percent.toFixed(0)}%
               </span>
             </li>
           );
