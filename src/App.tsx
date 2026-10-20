@@ -22,7 +22,7 @@ export function App() {
       <div className="min-h-screen bg-gray-100 text-gray-900">
         <Navbar />
         <Routes>
-          <Route path="/" element={<HomeView />} />
+          <Route path="/" element={<HomeView logs={logs} />} />
           <Route path="/log" element={<LogHabitView logs={logs} onAddLog={handleAddLog} />} />
           <Route path="/analytics" element={<AnalyticsView logs={logs} />} />
         </Routes>
