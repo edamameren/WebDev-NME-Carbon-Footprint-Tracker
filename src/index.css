@@ -321,6 +321,76 @@ h2 {
   font-weight: 700;
 }
 
+.entry-actions,
+.entry-edit-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.entry-action {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #527b61;
+  cursor: pointer;
+  place-items: center;
+}
+
+.entry-action svg {
+  width: 16px;
+  height: 16px;
+}
+
+.entry-action:hover {
+  background: #edf5eb;
+}
+
+.entry-action--delete {
+  color: #a6534d;
+}
+
+.entry-action--delete:hover {
+  background: #fbefed;
+}
+
+.entry-action:focus-visible {
+  outline: 2px solid #75a583;
+  outline-offset: 2px;
+}
+
+.activity-row--editing {
+  display: block;
+  background: #fbfdf9;
+}
+
+.entry-edit-form {
+  display: grid;
+  width: 100%;
+  gap: 16px;
+}
+
+.entry-edit-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(130px, 0.85fr) minmax(100px, 0.55fr);
+  gap: 12px;
+}
+
+.entry-edit-actions {
+  justify-content: flex-end;
+}
+
+.entry-save-button {
+  min-height: 38px;
+  padding: 7px 13px;
+}
+
 .empty-state {
   padding: 26px;
   border: 1px dashed #ccd9cb;
@@ -425,6 +495,9 @@ h2 {
   .activity-row { align-items: flex-start; padding: 15px; gap: 10px; }
   .activity-copy { align-items: flex-start; flex-direction: column; gap: 6px; }
   .activity-value { padding-top: 2px; font-size: 12px; }
+  .entry-actions { flex-direction: column; align-items: flex-end; gap: 2px; }
+  .entry-edit-fields { grid-template-columns: 1fr; }
+  .activity-row--editing { padding: 17px; }
   .habit-form,
   .analytics-panel { padding: 20px; }
 }

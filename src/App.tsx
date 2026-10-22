@@ -17,13 +17,31 @@ export function App() {
     setLogs((current) => [log, ...current]);
   };
 
+  const handleUpdateLog = (updatedLog: HabitLog) => {
+    setLogs((current) => current.map((log) => log.id === updatedLog.id ? updatedLog : log));
+  };
+
+  const handleDeleteLog = (id: string) => {
+    setLogs((current) => current.filter((log) => log.id !== id));
+  };
+
   return (
     <Router>
       <div className="app-shell">
         <Navbar />
         <Routes>
           <Route path="/" element={<HomeView logs={logs} />} />
-          <Route path="/log" element={<LogHabitView logs={logs} onAddLog={handleAddLog} />} />
+          <Route
+            path="/log"
+            element={
+              <LogHabitView
+                logs={logs}
+                onAddLog={handleAddLog}
+                onUpdateLog={handleUpdateLog}
+                onDeleteLog={handleDeleteLog}
+              />
+            }
+          />
           <Route path="/analytics" element={<AnalyticsView logs={logs} />} />
         </Routes>
       </div>
