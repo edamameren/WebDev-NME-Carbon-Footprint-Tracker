@@ -82,25 +82,23 @@ export function App() {
     setLogs((current) => [toHabitLog(data as HabitLogRow), ...current]);
   };
 
-  if (loading) {
-    return <p className="p-8 text-gray-600">Loading…</p>;
-  }
-
-  if (loadError) {
-    return (
-      <p role="alert" className="p-8 text-red-600">
-        Could not load your data: {loadError}
-      </p>
-    );
-  }
-
   return (
     <Router>
-      <div className="min-h-screen bg-gray-100 text-gray-900">
+      <div className="app-shell">
         <Navbar />
         <Routes>
           <Route path="/" element={<HomeView logs={logs} />} />
-          <Route path="/log" element={<LogHabitView logs={logs} onAddLog={handleAddLog} />} />
+          <Route
+            path="/log"
+            element={
+              <LogHabitView
+                logs={logs}
+                onAddLog={handleAddLog}
+                onUpdateLog={handleUpdateLog}
+                onDeleteLog={handleDeleteLog}
+              />
+            }
+          />
           <Route path="/analytics" element={<AnalyticsView logs={logs} />} />
         </Routes>
       </div>
