@@ -34,31 +34,34 @@ export function App() {
     let cancelled = false;
 
     async function load() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
 
-      if (!session) {
-        const { error } = await supabase.auth.signInAnonymously();
-        if (error) {
-          if (!cancelled) {
-            setLoadError(error.message);
-            setLoading(false);
-          }
-          return;
+        if (sessionError) throw new Error(sessionError.message);
+
+        if (!session) {
+          const { error } = await supabase.auth.signInAnonymously();
+          if (error) throw new Error(error.message);
         }
+
+        const { data, error } = await supabase
+          .from('habit_logs')
+          .select(COLUMNS)
+          .order('log_date', { ascending: false })
+          .order('created_at', { ascending: false });
+
+        if (error) throw new Error(error.message);
+        if (!cancelled) setLogs((data as HabitLogRow[]).map(toHabitLog));
+      } catch (error) {
+        if (!cancelled) {
+          setLoadError(error instanceof Error ? error.message : 'Could not load habit entries.');
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-
-      const { data, error } = await supabase
-        .from('habit_logs')
-        .select(COLUMNS)
-        .order('log_date', { ascending: false })
-        .order('created_at', { ascending: false });
-
-      if (cancelled) return;
-      if (error) setLoadError(error.message);
-      else setLogs((data as HabitLogRow[]).map(toHabitLog));
-      setLoading(false);
     }
 
     load();
@@ -82,10 +85,41 @@ export function App() {
     setLogs((current) => [toHabitLog(data as HabitLogRow), ...current]);
   };
 
+  const handleUpdateLog = async (log: HabitLog) => {
+    const { data, error } = await supabase
+      .from('habit_logs')
+      .update({
+        category: log.category,
+        description: log.description,
+        co2_kg: log.co2Kg,
+      })
+      .eq('id', log.id)
+      .select(COLUMNS)
+      .single();
+
+    if (error) throw new Error(error.message);
+    const updatedLog = toHabitLog(data as HabitLogRow);
+    setLogs((current) => current.map((item) => item.id === updatedLog.id ? updatedLog : item));
+  };
+
+  const handleDeleteLog = async (id: string) => {
+    const { error } = await supabase
+      .from('habit_logs')
+      .delete()
+      .eq('id', id)
+      .select('id')
+      .single();
+
+    if (error) throw new Error(error.message);
+    setLogs((current) => current.filter((log) => log.id !== id));
+  };
+
   return (
     <Router>
       <div className="app-shell">
         <Navbar />
+        {loading && <p role="status">Loading your habit entries...</p>}
+        {loadError && <p role="alert">Could not load your habit entries: {loadError}</p>}
         <Routes>
           <Route path="/" element={<HomeView logs={logs} />} />
           <Route
