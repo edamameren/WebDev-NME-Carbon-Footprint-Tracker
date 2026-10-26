@@ -1,21 +1,98 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/common/Navbar';
 import { HomeView } from './views/HomeView';
 import { LogHabitView } from './views/LogHabitView';
 import { AnalyticsView } from './views/AnalyticsView';
-import type { HabitLog } from './types/footprint';
+import { supabase } from './lib/supabase';
+import type { HabitLog, NewHabitLog } from './types/footprint';
 
-const INITIAL_LOGS: HabitLog[] = [
-  { id: '1', category: 'Transport', description: 'Public Transit Bus', co2Kg: 2.1, date: '2026-10-04' },
-];
+const COLUMNS = 'id, category, description, co2_kg, log_date';
+
+type HabitLogRow = {
+  id: string;
+  category: string;
+  description: string;
+  co2_kg: number | string;
+  log_date: string;
+};
+
+const toHabitLog = (r: HabitLogRow): HabitLog => ({
+  id: r.id,
+  category: r.category,
+  description: r.description,
+  co2Kg: Number(r.co2_kg),
+  date: r.log_date,
+});
 
 export function App() {
-  const [logs, setLogs] = useState<HabitLog[]>(INITIAL_LOGS);
+  const [logs, setLogs] = useState<HabitLog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const handleAddLog = (log: HabitLog) => {
-    setLogs((current) => [log, ...current]);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        const { error } = await supabase.auth.signInAnonymously();
+        if (error) {
+          if (!cancelled) {
+            setLoadError(error.message);
+            setLoading(false);
+          }
+          return;
+        }
+      }
+
+      const { data, error } = await supabase
+        .from('habit_logs')
+        .select(COLUMNS)
+        .order('log_date', { ascending: false })
+        .order('created_at', { ascending: false });
+
+      if (cancelled) return;
+      if (error) setLoadError(error.message);
+      else setLogs((data as HabitLogRow[]).map(toHabitLog));
+      setLoading(false);
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleAddLog = async (log: NewHabitLog) => {
+    const { data, error } = await supabase
+      .from('habit_logs')
+      .insert({
+        category: log.category,
+        description: log.description,
+        co2_kg: log.co2Kg,
+      })
+      .select(COLUMNS)
+      .single();
+
+    if (error) throw new Error(error.message);
+    setLogs((current) => [toHabitLog(data as HabitLogRow), ...current]);
   };
+
+  if (loading) {
+    return <p className="p-8 text-gray-600">Loading…</p>;
+  }
+
+  if (loadError) {
+    return (
+      <p role="alert" className="p-8 text-red-600">
+        Could not load your data: {loadError}
+      </p>
+    );
+  }
 
   return (
     <Router>

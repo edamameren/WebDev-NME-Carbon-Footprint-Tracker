@@ -1,42 +1,44 @@
 import { useState } from 'react';
-import type { HabitLog } from '../types/footprint';
+import type { HabitLog, NewHabitLog } from '../types/footprint';
 
 interface LogHabitViewProps {
   logs: HabitLog[];
-  onAddLog: (log: HabitLog) => void;
+  onAddLog: (log: NewHabitLog) => Promise<void>;
 }
 
 export function LogHabitView({ logs, onAddLog }: LogHabitViewProps) {
   const [category, setCategory] = useState('Transport');
   const [description, setDescription] = useState('');
   const [co2Kg, setCo2Kg] = useState<number>(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description || co2Kg <= 0) return;
+    if (!description.trim() || co2Kg <= 0 || submitting) return;
 
-    const newLog: HabitLog = {
-      id: Date.now().toString(),
-      category,
-      description,
-      co2Kg,
-      date: new Date().toISOString().split('T')[0],
-    };
-
-    onAddLog(newLog);
-    setDescription('');
-    setCo2Kg(0);
+    setSubmitting(true);
+    setError(null);
+    try {
+      await onAddLog({ category, description: description.trim(), co2Kg });
+      setDescription('');
+      setCo2Kg(0);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save entry.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <div className="p-8 max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Log Daily Habit</h2>
-      
+
       <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow border">
         <div>
           <label className="block text-sm font-medium text-gray-700">Category</label>
-          <select 
-            value={category} 
+          <select
+            value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="mt-1 block w-full p-2 border rounded-md"
           >
@@ -49,8 +51,8 @@ export function LogHabitView({ logs, onAddLog }: LogHabitViewProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Description</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="e.g., Drove 10 miles, ate plant-based dinner"
@@ -60,8 +62,8 @@ export function LogHabitView({ logs, onAddLog }: LogHabitViewProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Estimated CO₂ (kg)</label>
-          <input 
-            type="number" 
+          <input
+            type="number"
             step="0.1"
             value={co2Kg || ''}
             onChange={(e) => setCo2Kg(parseFloat(e.target.value) || 0)}
@@ -69,8 +71,18 @@ export function LogHabitView({ logs, onAddLog }: LogHabitViewProps) {
           />
         </div>
 
-        <button type="submit" className="w-full bg-emerald-600 text-white p-2 rounded-md hover:bg-emerald-700">
-          Add Log Entry
+        {error && (
+          <p role="alert" className="text-red-600 text-sm">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={submitting}
+          className="w-full bg-emerald-600 text-white p-2 rounded-md hover:bg-emerald-700 disabled:opacity-50"
+        >
+          {submitting ? 'Saving…' : 'Add Log Entry'}
         </button>
       </form>
 

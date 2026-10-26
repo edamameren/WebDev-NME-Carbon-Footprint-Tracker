@@ -5,3 +5,5 @@ export interface HabitLog {
     co2Kg: number;
     date: string;
   }
+
+export type NewHabitLog = Pick<HabitLog, 'category' | 'description' | 'co2Kg'>;
