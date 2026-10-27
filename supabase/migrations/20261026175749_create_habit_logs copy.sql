@@ -17,3 +17,7 @@ create policy "Users manage their own logs"
   for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+alter table public.habit_logs
+  add column factor_id uuid references public.emission_factors (id),
+  add column quantity  numeric(10,2) check (quantity > 0);
