@@ -4,7 +4,7 @@ import { Navbar } from './components/common/Navbar';
 import { HomeView } from './views/HomeView';
 import { LogHabitView } from './views/LogHabitView';
 import { AnalyticsView } from './views/AnalyticsView';
-import { supabase } from './lib/supabase';
+import { getSupabaseClient } from './lib/supabase';
 import type { EmissionFactor, HabitLog, NewHabitLog } from './types/footprint';
 
 const LOG_COLUMNS = 'id, category, description, co2_kg, log_date';
@@ -52,6 +52,17 @@ export function App() {
     let cancelled = false;
 
     async function load() {
+      let supabase;
+      try {
+        supabase = getSupabaseClient();
+      } catch (error) {
+        if (!cancelled) {
+          setLoadError(error instanceof Error ? error.message : String(error));
+          setLoading(false);
+        }
+        return;
+      }
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -99,6 +110,7 @@ export function App() {
   }, []);
 
   const handleAddLog = async (log: NewHabitLog) => {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('habit_logs')
       .insert({

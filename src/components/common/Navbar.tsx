@@ -10,7 +10,7 @@ export function Navbar() {
         </NavLink>
         <div className="nav-links">
           <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link nav-link--active' : 'nav-link'}>Overview</NavLink>
-          <NavLink to="/log" className={({ isActive }) => isActive ? 'nav-link nav-link--active' : 'nav-link'}>Log a habit</NavLink>
+          <NavLink to="/log" className={({ isActive }) => isActive ? 'nav-link nav-link--active' : 'nav-link'}>Log a Habit</NavLink>
           <NavLink to="/analytics" className={({ isActive }) => isActive ? 'nav-link nav-link--active' : 'nav-link'}>Analytics</NavLink>
         </div>
       </nav>
