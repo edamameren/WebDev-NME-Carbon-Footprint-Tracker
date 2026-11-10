@@ -1,3 +1,4 @@
+-- Emission factors used by the activity logging form.
 create table public.emission_factors (
   id                 uuid primary key default gen_random_uuid(),
   category           text not null check (category in ('Transport', 'Energy', 'Diet', 'Waste')),

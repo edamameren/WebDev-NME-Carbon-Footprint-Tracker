@@ -3,13 +3,13 @@ import { aggregateCo2ByCategory, type CategoryTotal } from '../utils/aggregateBy
 import './CategoryPieChart.css';
 
 const CATEGORY_COLORS = new Map([
-  ['Transport', '#0ea5e9'],
-  ['Energy', '#f59e0b'],
-  ['Diet', '#10b981'],
-  ['Waste', '#8b5cf6'],
+  ['Transport', '#659bb3'],
+  ['Energy', '#d2a24d'],
+  ['Diet', '#6a9c6d'],
+  ['Waste', '#927fb6'],
 ]);
 
-const FALLBACK_COLOR = '#6b7280';
+const FALLBACK_COLOR = '#89958c';
 
 function colorForCategory(category: string): string {
   return CATEGORY_COLORS.get(category) ?? FALLBACK_COLOR;

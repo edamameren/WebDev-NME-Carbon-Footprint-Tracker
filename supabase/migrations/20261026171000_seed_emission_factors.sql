@@ -1,3 +1,4 @@
+-- EPA GHG Emission Factors Hub values used by the activity logging form.
 insert into public.emission_factors
   (category, activity, unit, kg_co2e_per_unit, source, source_year)
 values

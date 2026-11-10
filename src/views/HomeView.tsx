@@ -4,6 +4,10 @@ interface HomeViewProps {
   logs: HabitLog[];
 }
 
+function categoryClass(category: string): string {
+  return category.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
+}
+
 export function HomeView({ logs }: HomeViewProps) {
   const today = new Date().toISOString().split('T')[0];
   const todaysLogs = logs.filter((log) => log.date === today);
@@ -44,7 +48,9 @@ export function HomeView({ logs }: HomeViewProps) {
               <li key={log.id} className="activity-row">
                 <div className="activity-copy">
                   <p className="activity-title">{log.description}</p>
-                  <span className="category-tag">{log.category}</span>
+                  <span className={`category-tag category-tag--${categoryClass(log.category)}`}>
+                    {log.category}
+                  </span>
                 </div>
                 <span className="activity-value">{log.co2Kg} kg CO₂e</span>
               </li>

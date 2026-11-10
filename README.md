@@ -17,6 +17,24 @@ key, never a `service_role` or secret key in this frontend app. You can copy
 `.env`; Vite only reads environment variables at startup.
 
 The app also requires the Supabase database schema and policies in `supabase/`.
+After linking the project with the Supabase CLI, run `supabase db push` to apply
+the migrations. In the hosted Supabase project's **Authentication** settings,
+enable anonymous sign-ins because the app uses anonymous authentication for
+personal activity logs.
+
+## Deploying to Vercel
+
+Vercel does not read your local `.env` file. In your Vercel project, open
+**Settings > Environment Variables** and add these variables with the values
+from your local `.env` file:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+Enable them for every environment where you deploy (Production, Preview, and/or
+Development), then redeploy so Vite can include them in the build. Use the
+Supabase anon/public key, never a service-role or secret key. Keep `.env`
+local; do not commit it.
 
 ## Development
 

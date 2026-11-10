@@ -1,3 +1,4 @@
+-- Per-user activity logs protected by row-level security.
 create table public.habit_logs (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null references auth.users (id) on delete cascade default auth.uid(),

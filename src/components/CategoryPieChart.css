@@ -21,13 +21,13 @@
   height: 118px;
   border-radius: 50%;
   background: #ffffff;
-  color: #263c31;
+  color: #1d3129;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  box-shadow: inset 0 0 0 1px #e1e9df;
+  box-shadow: inset 0 0 0 1px #d7e0d7;
 }
 
 .category-pie__total {
@@ -38,7 +38,7 @@
 
 .category-pie__unit {
   font-size: 0.75rem;
-  color: #718077;
+  color: #46564c;
 }
 
 .category-pie__legend {
@@ -72,11 +72,11 @@
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
-  color: #34483a;
+  color: #293d32;
 }
 
 .category-pie__value {
-  color: #718077;
+  color: #46564c;
   white-space: nowrap;
 }
 

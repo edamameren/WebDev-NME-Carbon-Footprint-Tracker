@@ -7,6 +7,10 @@ interface LogHabitViewProps {
   onAddLog: (log: NewHabitLog) => Promise<void>;
 }
 
+function categoryClass(category: string): string {
+  return category.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
+}
+
 export function LogHabitView({ logs, factors, onAddLog }: LogHabitViewProps) {
   const [category, setCategory] = useState('');
   const [factorId, setFactorId] = useState('');
@@ -24,17 +28,6 @@ export function LogHabitView({ logs, factors, onAddLog }: LogHabitViewProps) {
   const hasValidQty = Number.isFinite(qty) && qty > 0;
   const co2Kg =
     factor && hasValidQty ? Math.round(qty * factor.kgCo2ePerUnit * 100) / 100 : 0;
-
-  if (factors.length === 0) {
-    return (
-      <div className="p-8 max-w-2xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6">Log Daily Habit</h2>
-        <p className="text-gray-600">
-          No emission factors found. Import the emission_factors data into Supabase first.
-        </p>
-      </div>
-    );
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,113 +61,175 @@ export function LogHabitView({ logs, factors, onAddLog }: LogHabitViewProps) {
     }
   };
 
+  if (factors.length === 0) {
+    return (
+      <main className="page-content page-content--narrow">
+        <section className="page-heading">
+          <p className="eyebrow">Make mindful choices visible</p>
+          <h1>Log a daily habit</h1>
+          <p className="page-intro">
+            No emission factors found yet. Add the emission factor data to Supabase to start logging.
+          </p>
+        </section>
+      </main>
+    );
+  }
+
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Log Daily Habit</h2>
+    <main className="page-content page-content--wide">
+      <section className="page-heading log-page-heading">
+        <p className="eyebrow">A little more awareness, every day</p>
+        <h1>Log a daily habit</h1>
+        <p className="page-intro">
+          Capture the things you do and get a simple estimate of their climate impact.
+        </p>
+      </section>
 
-      <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow border">
-        <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-            Category
-          </label>
-          <select
-            id="category"
-            value={activeCategory}
-            onChange={(e) => {
-              setCategory(e.target.value);
-              setFactorId('');
-            }}
-            className="mt-1 block w-full p-2 border rounded-md"
-          >
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="log-layout">
+        <form onSubmit={handleSubmit} className="habit-form habit-form--log">
+          <div className="form-step-heading">
+            <span className="form-step-number">01</span>
+            <div>
+              <p className="form-step-title">Tell us about it</p>
+              <p className="form-step-note">Choose an activity and add a little detail.</p>
+            </div>
+          </div>
 
-        <div>
-          <label htmlFor="activity" className="block text-sm font-medium text-gray-700">
-            Activity
-          </label>
-          <select
-            id="activity"
-            value={factor?.id ?? ''}
-            onChange={(e) => setFactorId(e.target.value)}
-            className="mt-1 block w-full p-2 border rounded-md"
-          >
-            {categoryFactors.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.activity} ({f.unit})
-              </option>
-            ))}
-          </select>
-        </div>
+          <fieldset className="form-field category-field">
+            <legend>Category</legend>
+            <div className="category-options">
+              {categories.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={`category-option category-option--${categoryClass(item)}${activeCategory === item ? ' category-option--selected' : ''}`}
+                  aria-pressed={activeCategory === item}
+                  onClick={() => {
+                    setCategory(item);
+                    setFactorId('');
+                    setError(null);
+                  }}
+                >
+                  <span className="category-option-dot" aria-hidden="true" />
+                  {item}
+                </button>
+              ))}
+            </div>
+          </fieldset>
 
-        <div>
-          <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
-            Amount{factor ? ` (${factor.unit})` : ''}
-          </label>
-          <input
-            id="quantity"
-            type="number"
-            step="any"
-            min="0"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            className="mt-1 block w-full p-2 border rounded-md"
-          />
-          {hasValidQty && factor && (
-            <p className="mt-1 text-sm text-gray-600">
-              ≈ {co2Kg.toFixed(2)} kg CO₂
+          <div className="form-field">
+            <label htmlFor="activity">Activity</label>
+            <select
+              id="activity"
+              value={factor?.id ?? ''}
+              onChange={(e) => setFactorId(e.target.value)}
+              required
+            >
+              {categoryFactors.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.activity}
+                </option>
+              ))}
+            </select>
+            {factor && <span className="field-hint">Measured per {factor.unit}</span>}
+          </div>
+
+          <div className="form-field form-field--quantity">
+            <label htmlFor="quantity">Amount</label>
+            <div className="quantity-input-wrap">
+              <input
+                id="quantity"
+                type="number"
+                step="any"
+                min="0"
+                value={quantity}
+                onChange={(e) => {
+                  setQuantity(e.target.value);
+                  setError(null);
+                }}
+                placeholder="0"
+                required
+              />
+              <span className="quantity-unit">{factor?.unit ?? 'units'}</span>
+            </div>
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="description">Note <span className="optional-label">Optional</span></label>
+            <input
+              id="description"
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Add a detail to remember this by"
+              maxLength={120}
+            />
+          </div>
+
+          {error && (
+            <p role="alert" className="form-error">
+              <span aria-hidden="true">!</span>
+              {error}
             </p>
           )}
-        </div>
 
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-            Note (optional)
-          </label>
-          <input
-            id="description"
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="e.g., Heated the house this week"
-            className="mt-1 block w-full p-2 border rounded-md"
-          />
-        </div>
+          <button type="submit" disabled={submitting || !factor} className="primary-button log-submit">
+            <span>{submitting ? 'Saving entry…' : 'Add to my log'}</span>
+            {!submitting && <span aria-hidden="true">→</span>}
+          </button>
+        </form>
 
-        {error && (
-          <p role="alert" className="text-red-600 text-sm">
-            {error}
+        <aside className="impact-preview" aria-live="polite">
+          <div className="impact-preview-orb impact-preview-orb--one" aria-hidden="true" />
+          <div className="impact-preview-orb impact-preview-orb--two" aria-hidden="true" />
+          <p className="impact-preview-kicker">Your estimate</p>
+          <p className="impact-preview-value">{co2Kg.toFixed(2)}<span>kg CO₂e</span></p>
+          <p className="impact-preview-description">
+            {hasValidQty && factor
+              ? `Estimated for ${qty} ${factor.unit} of ${factor.activity.toLowerCase()}.`
+              : 'Add an amount to see the estimated impact.'}
           </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full bg-emerald-600 text-white p-2 rounded-md hover:bg-emerald-700 disabled:opacity-50"
-        >
-          {submitting ? 'Saving…' : 'Add Log Entry'}
-        </button>
-      </form>
-
-      <div className="mt-8">
-        <h3 className="text-lg font-semibold mb-4">Recorded Entries (Stateful List)</h3>
-        <ul className="space-y-2">
-          {logs.map((log) => (
-            <li key={log.id} className="flex justify-between items-center p-3 bg-gray-50 rounded border">
-              <div>
-                <span className="font-medium">{log.description}</span>
-                <span className="ml-2 text-xs bg-gray-200 px-2 py-1 rounded">{log.category}</span>
-              </div>
-              <span className="font-semibold text-emerald-600">{log.co2Kg} kg CO₂</span>
-            </li>
-          ))}
-        </ul>
+          <div className="impact-preview-divider" />
+          <div className="impact-preview-factor">
+            <span className={`category-dot category-dot--${categoryClass(activeCategory)}`} aria-hidden="true" />
+            <div>
+              <span className="impact-preview-factor-label">Selected category</span>
+              <span className="impact-preview-factor-name">{activeCategory}</span>
+            </div>
+          </div>
+          <p className="impact-preview-footnote">Estimates are a guide to help you notice patterns over time.</p>
+        </aside>
       </div>
-    </div>
+
+      <section className="logged-section" aria-labelledby="logged-entries-heading">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Your activity, at a glance</p>
+            <h2 id="logged-entries-heading">Recent Entries</h2>
+          </div>
+          <span className="entry-count">{logs.length} {logs.length === 1 ? 'entry' : 'entries'}</span>
+        </div>
+        {logs.length > 0 ? (
+          <ul className="activity-list">
+            {logs.map((log) => (
+              <li key={log.id} className="activity-row">
+                <div className="activity-copy">
+                  <span className={`category-dot category-dot--${categoryClass(log.category)}`} aria-hidden="true" />
+                  <div className="activity-entry-copy">
+                    <p className="activity-title">{log.description}</p>
+                    <span className={`category-tag category-tag--${categoryClass(log.category)}`}>
+                      {log.category}
+                    </span>
+                  </div>
+                </div>
+                <span className="activity-value">{log.co2Kg.toFixed(2)} kg CO₂e</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="empty-state">Your first entry will appear here. Start with one small, everyday activity.</p>
+        )}
+      </section>
+    </main>
   );
 }

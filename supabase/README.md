@@ -1,5 +1,19 @@
 # Supabase data
 
+## Apply the database setup
+
+The application requires the `public.emission_factors` and
+`public.habit_logs` tables. Apply all migrations to your linked Supabase project:
+
+```sh
+supabase login
+supabase link --project-ref <your-project-ref>
+supabase db push
+```
+
+In the hosted project's **Authentication** settings, also enable anonymous
+sign-ins; the app uses anonymous authentication for personal activity logs.
+
 ## EPA WARM v16 emission factors
 
 The migration `migrations/20261026194000_import_warm_v16_emission_factors.sql`
@@ -10,11 +24,3 @@ calculator outputs and energy/economic factors on other sheets, are not imported
 
 The table is read-only to application users and is separate from personal
 `habit_logs`. The application does not use these factors yet.
-
-To apply the migration to a linked Supabase project, authenticate with the
-Supabase CLI, then run:
-
-```sh
-supabase link --project-ref <your-project-ref>
-supabase db push
-```
